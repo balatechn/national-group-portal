@@ -3,8 +3,11 @@ import type { PageServerLoad } from './$types.js';
 export const load: PageServerLoad = async () => {
 	try {
 		// Try to import database and load real data
-		const { db } = await import('$lib/server/db/index.js');
+		const { db, initializeDatabase } = await import('$lib/server/db/index.js');
 		const { itRequests } = await import('$lib/server/db/schema.js');
+		
+		// Ensure database is initialized
+		await initializeDatabase();
 		
 		if (!db) {
 			throw new Error('Database not available');
@@ -85,7 +88,7 @@ export const load: PageServerLoad = async () => {
 				}
 			],
 			demo: true,
-			error: 'Database connection failed. Showing demo data.'
+			error: 'Database connection failed. Showing demo data for now. Data will persist when database is configured.'
 		};
 	}
 };

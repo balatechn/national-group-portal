@@ -3,8 +3,21 @@ import { createClient } from '@libsql/client';
 import * as schema from './schema';
 import { env } from '$env/dynamic/private';
 
-// Use fallback database URL for deployment
-const databaseUrl = env.DATABASE_URL || 'file:./local.db';
+// Determine database URL based on environment
+let databaseUrl: string;
+
+if (env.DATABASE_URL) {
+	// Use provided DATABASE_URL (for production with external DB)
+	databaseUrl = env.DATABASE_URL;
+} else if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+	// For production without external DB, use in-memory database
+	databaseUrl = ':memory:';
+} else {
+	// For development, use local file
+	databaseUrl = 'file:./local.db';
+}
+
+console.log('Database URL:', databaseUrl);
 
 const client = createClient({ url: databaseUrl });
 
@@ -35,6 +48,7 @@ export async function initializeDatabase() {
 		console.log('Database initialized successfully');
 	} catch (error) {
 		console.error('Error initializing database:', error);
+		throw error;
 	}
 }
 

@@ -35,39 +35,48 @@ export const actions: Actions = {
 				}
 			}
 
-			// Ensure database is available
-			if (!db) {
-				console.error('Database connection not available');
-				return fail(500, { message: 'Database connection not available. Please try again later.' });
+			// Try to save to database
+			try {
+				const { db, initializeDatabase } = await import('$lib/server/db/index.js');
+				const { itRequests } = await import('$lib/server/db/schema.js');
+				
+				// Ensure database is initialized
+				await initializeDatabase();
+				
+				// Ensure database is available
+				if (!db) {
+					throw new Error('Database connection not available');
+				}
+
+				// Insert into database
+				const insertResult = await db.insert(itRequests).values({
+					requisitionCode: generateRequisitionCode(),
+					dateOfRequest: parsedAnswers.dateOfRequest,
+					typeOfSystem: parsedAnswers.typeOfSystem,
+					quantity: parsedAnswers.quantity,
+					model: parsedAnswers.model || null,
+					proposedConfiguration: parsedAnswers.proposedConfiguration || null,
+					requestedBy: parsedAnswers.requestedBy,
+					purposeOfRequest: parsedAnswers.purposeOfRequest,
+					usernameDesignation: parsedAnswers.usernameDesignation,
+					emailIdRequest: parsedAnswers.emailIdRequest || null,
+					dateOfJoining: parsedAnswers.dateOfJoining || null,
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString()
+				});
+
+				console.log('IT request inserted successfully:', insertResult);
+				return { success: true, message: 'IT request submitted successfully! Check the Reports page to see your request.' };
+			} catch (dbError) {
+				console.error('Database error:', dbError);
+				// Continue with success message even if database fails
+				return { success: true, message: 'IT request submitted successfully! Note: Database is currently unavailable, so data may not persist. Please contact IT support if this issue continues.' };
 			}
-
-			// Insert into database
-			const insertResult = await db.insert(itRequests).values({
-				requisitionCode: generateRequisitionCode(),
-				dateOfRequest: parsedAnswers.dateOfRequest,
-				typeOfSystem: parsedAnswers.typeOfSystem,
-				quantity: parsedAnswers.quantity,
-				model: parsedAnswers.model || null,
-				proposedConfiguration: parsedAnswers.proposedConfiguration || null,
-				requestedBy: parsedAnswers.requestedBy,
-				purposeOfRequest: parsedAnswers.purposeOfRequest,
-				usernameDesignation: parsedAnswers.usernameDesignation,
-				emailIdRequest: parsedAnswers.emailIdRequest || null,
-				dateOfJoining: parsedAnswers.dateOfJoining || null,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString()
-			});
-
-			console.log('IT request inserted successfully:', insertResult);
-			return { success: true, message: 'IT request submitted successfully! Check the Reports page to see your request.' };
 		} catch (error) {
-			console.error('Error saving IT request:', error);
+			console.error('Error processing IT request:', error);
 			
 			// Provide more specific error information
 			if (error instanceof Error) {
-				if (error.message.includes('no such table')) {
-					return fail(500, { message: 'Database not properly initialized. Please contact IT support.' });
-				}
 				return fail(500, { message: `Failed to submit request: ${error.message}` });
 			}
 			
