@@ -35,33 +35,26 @@ export const actions: Actions = {
 				}
 			}
 
-			// Try to insert into database with error handling
-			try {
-				await db.insert(itRequests).values({
-					requisitionCode: generateRequisitionCode(),
-					dateOfRequest: parsedAnswers.dateOfRequest,
-					typeOfSystem: parsedAnswers.typeOfSystem,
-					quantity: parsedAnswers.quantity,
-					model: parsedAnswers.model || null,
-					proposedConfiguration: parsedAnswers.proposedConfiguration || null,
-					requestedBy: parsedAnswers.requestedBy,
-					purposeOfRequest: parsedAnswers.purposeOfRequest,
-					usernameDesignation: parsedAnswers.usernameDesignation,
-					emailIdRequest: parsedAnswers.emailIdRequest || null,
-					dateOfJoining: parsedAnswers.dateOfJoining || null,
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString()
-				});
+			// Insert into database
+			await db.insert(itRequests).values({
+				requisitionCode: generateRequisitionCode(),
+				dateOfRequest: parsedAnswers.dateOfRequest,
+				typeOfSystem: parsedAnswers.typeOfSystem,
+				quantity: parsedAnswers.quantity,
+				model: parsedAnswers.model || null,
+				proposedConfiguration: parsedAnswers.proposedConfiguration || null,
+				requestedBy: parsedAnswers.requestedBy,
+				purposeOfRequest: parsedAnswers.purposeOfRequest,
+				usernameDesignation: parsedAnswers.usernameDesignation,
+				emailIdRequest: parsedAnswers.emailIdRequest || null,
+				dateOfJoining: parsedAnswers.dateOfJoining || null,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			});
 
-				return { success: true, message: 'IT request submitted successfully!' };
-			} catch (dbError) {
-				console.error('Database error:', dbError);
-				// For now, return success even if database fails (form validation passed)
-				// In production, you would set up proper database connection
-				return { success: true, message: 'IT request received! (Database setup pending)' };
-			}
+			return { success: true, message: 'IT request submitted successfully!' };
 		} catch (error) {
-			console.error('Error processing IT request:', error);
+			console.error('Error saving IT request:', error);
 			return fail(500, { message: 'Failed to submit request. Please try again.' });
 		}
 	}

@@ -3,28 +3,9 @@ import { createClient } from '@libsql/client';
 import * as schema from './schema';
 import { env } from '$env/dynamic/private';
 
-// Lazy database connection
-let _db: ReturnType<typeof drizzle> | null = null;
+// Use fallback database URL for deployment
+const databaseUrl = env.DATABASE_URL || 'file:./local.db';
 
-function getDatabase() {
-	if (_db) return _db;
+const client = createClient({ url: databaseUrl });
 
-	// Use fallback database URL if not set (for build time)
-	const databaseUrl = env.DATABASE_URL || 'file:./local.db';
-	
-	try {
-		const client = createClient({ url: databaseUrl });
-		_db = drizzle(client, { schema });
-		return _db;
-	} catch (error) {
-		console.error('Database connection error:', error);
-		// Return a mock database for build time
-		throw new Error('Database not available');
-	}
-}
-
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-	get(target, prop) {
-		return getDatabase()[prop as keyof ReturnType<typeof drizzle>];
-	}
-});
+export const db = drizzle(client, { schema });
