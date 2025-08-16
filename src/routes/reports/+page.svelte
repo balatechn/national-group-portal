@@ -14,6 +14,7 @@
 	$: requests = data.requests || [];
 	$: errorMessage = data.error || null;
 	$: isDemo = data.demo || false;
+	$: demoMessage = data.message || null;
 
 	$: filteredRequests = requests.filter(request => {
 		const matchesSearch = 
@@ -123,7 +124,7 @@
 				<svg viewBox="0 0 24 24" class="demo-icon">
 					<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 				</svg>
-				Demo Mode: Showing sample data for testing purposes
+				{demoMessage || 'Demo Mode: Showing sample data for testing purposes'}
 			</div>
 		{/if}
 		{#if errorMessage}

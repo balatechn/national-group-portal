@@ -35,8 +35,14 @@ export const actions: Actions = {
 				}
 			}
 
+			// Ensure database is available
+			if (!db) {
+				console.error('Database connection not available');
+				return fail(500, { message: 'Database connection not available. Please try again later.' });
+			}
+
 			// Insert into database
-			await db.insert(itRequests).values({
+			const insertResult = await db.insert(itRequests).values({
 				requisitionCode: generateRequisitionCode(),
 				dateOfRequest: parsedAnswers.dateOfRequest,
 				typeOfSystem: parsedAnswers.typeOfSystem,
@@ -52,9 +58,19 @@ export const actions: Actions = {
 				updatedAt: new Date().toISOString()
 			});
 
-			return { success: true, message: 'IT request submitted successfully!' };
+			console.log('IT request inserted successfully:', insertResult);
+			return { success: true, message: 'IT request submitted successfully! Check the Reports page to see your request.' };
 		} catch (error) {
 			console.error('Error saving IT request:', error);
+			
+			// Provide more specific error information
+			if (error instanceof Error) {
+				if (error.message.includes('no such table')) {
+					return fail(500, { message: 'Database not properly initialized. Please contact IT support.' });
+				}
+				return fail(500, { message: `Failed to submit request: ${error.message}` });
+			}
+			
 			return fail(500, { message: 'Failed to submit request. Please try again.' });
 		}
 	}
