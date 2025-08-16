@@ -1,74 +1,38 @@
-# National Group Portal
+# sv
 
-A modern IT request portal built with SvelteKit, featuring glassmorphism design, Zoho app integration, and an intelligent chat agent.
+Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-## Features
+## Creating a project
 
-- 🏢 **Professional Portal Design** - Glassmorphism UI with golden National Group branding
-- 📝 **IT Request Form** - Typeform-style interactive request submission
-- 🔗 **Zoho Integration** - Direct access to all Zoho applications (.in domain)
-- 💬 **Chat Agent** - Intelligent IT support chat widget
-- 📱 **Responsive Design** - Works on desktop and mobile devices
-- 🔍 **Contact Page** - IT helpdesk contact information
+If you're seeing this, you've probably already done this step. Congrats!
 
-## Deployment on Vercel
-
-### Prerequisites
-1. A Vercel account at [vercel.com](https://vercel.com)
-2. A Turso database account (for production SQLite database)
-
-### Step 1: Set up Production Database
-1. Go to [turso.tech](https://turso.tech) and create a free account
-2. Create a new database: `turso db create national-group-portal`
-3. Get the database URL: `turso db show national-group-portal --url`
-4. Generate an auth token: `turso db tokens create national-group-portal`
-
-### Step 2: Deploy to Vercel
-
-#### Option A: Deploy via Vercel CLI
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# create a new project in the current directory
+npx sv create
 
-# Login to Vercel
-vercel login
-
-# Deploy the project
-vercel
-
-# Set environment variables
-vercel env add DATABASE_URL
-# Enter your Turso database URL when prompted
+# create a new project in my-app
+npx sv create my-app
 ```
 
-#### Option B: Deploy via Vercel Dashboard
-1. Go to [vercel.com/dashboard](https://vercel.com/dashboard)
-2. Click "New Project"
-3. Import your Git repository
-4. Framework Preset: **SvelteKit**
-5. Build Command: `npm run build`
-6. Output Directory: `build`
-7. Install Command: `npm install`
+## Developing
 
-### Step 3: Configure Environment Variables
-In your Vercel project dashboard:
-1. Go to Settings → Environment Variables
-2. Add the following variables:
-   - `DATABASE_URL`: Your Turso database URL
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-### Step 4: Update Database Schema
-After deployment, run database migrations:
 ```bash
-# If using Vercel CLI
-vercel env pull .env.local
-npm run db:push
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-## Local Development
+## Building
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Copy environment variables: `cp .env.example .env`
-4. Update `.env` with your database URL
-5. Push database schema: `npm run db:push`
-6. Start development server: `npm run dev`
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
+> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
