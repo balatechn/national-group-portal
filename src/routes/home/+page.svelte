@@ -66,6 +66,7 @@
 	<nav class="navigation">
 		<a href="/home" class="nav-link active">Home</a>
 		<a href="/request" class="nav-link">IT Request</a>
+		<a href="/reports" class="nav-link">Reports</a>
 		<a href="/contact" class="nav-link">Contact</a>
 	</nav>
 </div>
