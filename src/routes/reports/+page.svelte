@@ -10,12 +10,16 @@
 	let statusFilter = 'all';
 	let sortBy = 'date';
 
-	$: filteredRequests = data.requests.filter(request => {
+	// Handle case where data.requests might be undefined
+	$: requests = data.requests || [];
+	$: errorMessage = data.error || null;
+
+	$: filteredRequests = requests.filter(request => {
 		const matchesSearch = 
-			request.requisitionCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			request.requestedBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			request.typeOfSystem.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			request.purposeOfRequest.toLowerCase().includes(searchTerm.toLowerCase());
+			request.requisitionCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			request.requestedBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			request.typeOfSystem?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			request.purposeOfRequest?.toLowerCase().includes(searchTerm.toLowerCase());
 		
 		return matchesSearch;
 	});
@@ -23,13 +27,15 @@
 	$: sortedRequests = [...filteredRequests].sort((a, b) => {
 		switch (sortBy) {
 			case 'date':
-				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+				const dateA = new Date(a.createdAt || 0);
+				const dateB = new Date(b.createdAt || 0);
+				return dateB.getTime() - dateA.getTime();
 			case 'code':
-				return a.requisitionCode.localeCompare(b.requisitionCode);
+				return (a.requisitionCode || '').localeCompare(b.requisitionCode || '');
 			case 'name':
-				return a.requestedBy.localeCompare(b.requestedBy);
+				return (a.requestedBy || '').localeCompare(b.requestedBy || '');
 			case 'type':
-				return a.typeOfSystem.localeCompare(b.typeOfSystem);
+				return (a.typeOfSystem || '').localeCompare(b.typeOfSystem || '');
 			default:
 				return 0;
 		}
@@ -37,6 +43,8 @@
 
 	function getStatusBadge(request: any) {
 		// Simple status based on creation date (you can enhance this logic)
+		if (!request.createdAt) return { text: 'Unknown', class: 'status-review' };
+		
 		const daysSinceCreated = Math.floor(
 			(Date.now() - new Date(request.createdAt).getTime()) / (1000 * 60 * 60 * 24)
 		);
@@ -64,17 +72,17 @@
 		const csvContent = [
 			headers.join(','),
 			...sortedRequests.map(request => [
-				request.requisitionCode,
-				request.dateOfRequest,
-				request.typeOfSystem,
-				request.quantity,
+				request.requisitionCode || '',
+				request.dateOfRequest || '',
+				request.typeOfSystem || '',
+				request.quantity || '',
 				request.model || '',
-				request.requestedBy,
-				`"${request.purposeOfRequest}"`,
-				request.usernameDesignation,
+				request.requestedBy || '',
+				`"${request.purposeOfRequest || ''}"`,
+				request.usernameDesignation || '',
 				request.emailIdRequest || '',
 				request.dateOfJoining || '',
-				request.createdAt
+				request.createdAt || ''
 			].join(','))
 		].join('\n');
 
@@ -109,6 +117,14 @@
 	<div class="reports-header">
 		<h1>IT Requests Reports</h1>
 		<p>View and manage all submitted IT requests</p>
+		{#if errorMessage}
+			<div class="error-message">
+				<svg viewBox="0 0 24 24" class="error-icon">
+					<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+				</svg>
+				{errorMessage}
+			</div>
+		{/if}
 	</div>
 
 	<div class="controls-section">
@@ -145,22 +161,24 @@
 
 		<div class="stats-cards">
 			<div class="stat-card">
-				<div class="stat-number">{data.requests.length}</div>
+				<div class="stat-number">{requests.length}</div>
 				<div class="stat-label">Total Requests</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-number">
-					{data.requests.filter(r => 
-						Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) < 7
-					).length}
+					{requests.filter(r => {
+						if (!r.createdAt) return false;
+						return Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) < 7;
+					}).length}
 				</div>
 				<div class="stat-label">This Week</div>
 			</div>
 			<div class="stat-card">
 				<div class="stat-number">
-					{data.requests.filter(r => 
-						Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) < 1
-					).length}
+					{requests.filter(r => {
+						if (!r.createdAt) return false;
+						return Math.floor((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) < 1;
+					}).length}
 				</div>
 				<div class="stat-label">Today</div>
 			</div>
@@ -289,6 +307,28 @@
 	.reports-header p {
 		font-size: 1.1rem;
 		opacity: 0.9;
+	}
+
+	.error-message {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: rgba(239, 68, 68, 0.1);
+		border: 1px solid rgba(239, 68, 68, 0.3);
+		border-radius: 8px;
+		padding: 12px 16px;
+		margin-top: 1rem;
+		color: #fca5a5;
+		font-size: 0.9rem;
+	}
+
+	.error-icon {
+		width: 20px;
+		height: 20px;
+		stroke: currentColor;
+		fill: none;
+		stroke-width: 2;
+		flex-shrink: 0;
 	}
 
 	.controls-section {
