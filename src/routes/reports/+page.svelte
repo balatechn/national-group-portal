@@ -13,6 +13,7 @@
 	// Handle case where data.requests might be undefined
 	$: requests = data.requests || [];
 	$: errorMessage = data.error || null;
+	$: isDemo = data.demo || false;
 
 	$: filteredRequests = requests.filter(request => {
 		const matchesSearch = 
@@ -117,6 +118,14 @@
 	<div class="reports-header">
 		<h1>IT Requests Reports</h1>
 		<p>View and manage all submitted IT requests</p>
+		{#if isDemo}
+			<div class="demo-message">
+				<svg viewBox="0 0 24 24" class="demo-icon">
+					<path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+				</svg>
+				Demo Mode: Showing sample data for testing purposes
+			</div>
+		{/if}
 		{#if errorMessage}
 			<div class="error-message">
 				<svg viewBox="0 0 24 24" class="error-icon">
@@ -322,7 +331,20 @@
 		font-size: 0.9rem;
 	}
 
-	.error-icon {
+	.demo-message {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		background: rgba(59, 130, 246, 0.1);
+		border: 1px solid rgba(59, 130, 246, 0.3);
+		border-radius: 8px;
+		padding: 12px 16px;
+		margin-top: 1rem;
+		color: #93c5fd;
+		font-size: 0.9rem;
+	}
+
+	.error-icon, .demo-icon {
 		width: 20px;
 		height: 20px;
 		stroke: currentColor;
