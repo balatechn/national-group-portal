@@ -40,15 +40,9 @@ export const actions: Actions = {
 				const { db, initializeDatabase } = await import('$lib/server/db/index.js');
 				const { itRequests } = await import('$lib/server/db/schema.js');
 				
-				// Ensure database is initialized
+				// Initialize database and insert data
 				await initializeDatabase();
 				
-				// Ensure database is available
-				if (!db) {
-					throw new Error('Database connection not available');
-				}
-
-				// Insert into database
 				const insertResult = await db.insert(itRequests).values({
 					requisitionCode: generateRequisitionCode(),
 					dateOfRequest: parsedAnswers.dateOfRequest,
